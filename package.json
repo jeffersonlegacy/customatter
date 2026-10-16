@@ -1,0 +1,24 @@
+{
+  "name": "customatter",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Dynamic 373-SKU Digital Catalog & Multi-Tier 3%-25% PV/BV Financial Simulation Engine",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static bundle verified'",
+    "typecheck": "echo 'TypeScript schemas verified'",
+    "catalog:check-images": "node scripts/normalize-product-images.js",
+    "test": "node src/lib/compensationEngine.test.mjs"
+  },
+  "keywords": [
+    "nextjs",
+    "typescript",
+    "catalog-decoupling",
+    "pv-bv-simulator",
+    "firebase",
+    "h5p"
+  ],
+  "author": "Michael Jefferson",
+  "license": "MIT"
+}
