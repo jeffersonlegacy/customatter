@@ -374,6 +374,15 @@
               </thead>
               <tbody id="ledger-tbody"></tbody>
             </table>
+
+            <div class="mono" style="margin-top: 1rem; padding: 0.85rem 1rem; border: 1px solid var(--line); background: #0c0c10; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; font-size: 0.76rem;">
+              <div>
+                <span style="color: var(--muted)">ANNUALIZED PROJECTION (12 MO):</span>
+                <strong id="val-annual" style="color: var(--emerald); margin-left: 0.4rem">$0.00</strong>
+                <span id="val-ruby" style="color: var(--amber); margin-left: 0.75rem"></span>
+              </div>
+              <button type="button" id="btn-export-csv" style="padding: 0.35rem 0.75rem; font-size: 0.68rem;">EXPORT LEDGER .CSV ↘</button>
+            </div>
           </div>
         </section>
 
@@ -434,6 +443,7 @@
       const inLegB = document.getElementById("in-legb");
       const inLegC = document.getElementById("in-legc");
       const tbody = document.getElementById("ledger-tbody");
+      let latestCsvRows = [];
 
       function fmtMoney(n) {
         return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -465,6 +475,12 @@
         const pBonus = pBv * groupPct;
         const retailMargin = pBv * 0.1;
 
+        latestCsvRows = [
+          ["Node", "PV", "BV", "Node Tier", "Diff Pct", "Payout USD"],
+          ["Personal Volume (Direct)", pPv.toFixed(0), pBv.toFixed(2), `${groupPctInt}%`, `${groupPctInt}%`, pBonus.toFixed(2)],
+          ["Retail Customer Margin (10% BV)", "0", pBv.toFixed(2), "RETAIL", "10%", retailMargin.toFixed(2)],
+        ];
+
         let rowsHtml = `
           <tr>
             <td>Personal Volume (Direct)</td>
@@ -491,6 +507,7 @@
           const diffPct = Math.max(0, groupPct - lPct);
           const payout = lBv * diffPct;
           totalDiff += payout;
+          latestCsvRows.push([`${leg.name} Pass-Up`, leg.pv, lBv.toFixed(2), `${Math.round(lPct * 100)}%`, `${Math.round(diffPct * 100)}%`, payout.toFixed(2)]);
           rowsHtml += `
             <tr>
               <td>${leg.name} Pass-Up</td>
@@ -504,6 +521,7 @@
         }
 
         const grandTotal = pBonus + retailMargin + totalDiff;
+        latestCsvRows.push(["TOTAL MONTHLY COMPENSATION", groupPv, (groupPv * BV_MULT).toFixed(2), `${groupPctInt}%`, "COMBINED", grandTotal.toFixed(2)]);
         rowsHtml += `
           <tr class="total-row">
             <td>TOTAL MONTHLY COMPENSATION</td>
@@ -515,6 +533,9 @@
           </tr>
         `;
         tbody.innerHTML = rowsHtml;
+        document.getElementById("val-annual").textContent = fmtMoney(grandTotal * 12);
+        const platinumStatus = groupPv >= 7500 ? "★ PLATINUM QUALIFYING PACE (7,500+ PV)" : `PLATINUM GAP: ${(7500 - groupPv).toLocaleString()} PV`;
+        document.getElementById("val-ruby").textContent = platinumStatus;
       }
 
       function renderCatalog(filterCat = "ALL") {
@@ -550,6 +571,17 @@
       document.getElementById("btn-reset-pv").addEventListener("click", () => {
         inPersonal.value = 350;
         renderLedger();
+      });
+
+      document.getElementById("btn-export-csv").addEventListener("click", () => {
+        const csv = latestCsvRows.map((r) => r.join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "customatter-differential-ledger.csv";
+        a.click();
+        URL.revokeObjectURL(url);
       });
 
       [inPersonal, inLegA, inLegB, inLegC].forEach((el) => el.addEventListener("input", renderLedger));
