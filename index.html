@@ -3,507 +3,558 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Customatter — 373-SKU Digital Catalog &amp; 3%–25% PV/BV Financial Simulation Engine</title>
+    <title>Customatter — Decoupled SKU Catalog &amp; 3%–25% PV/BV Financial Ledger</title>
     <meta
       name="description"
-      content="Decoupled static JSON digital catalog and reactive 3%–25% tiered PV/BV compensation simulator with interactive H5P product education."
+      content="Decoupled static JSON catalog and reactive 3%–25% multi-tier PV/BV differential compensation ledger."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+      rel="stylesheet"
     />
     <style>
       :root {
-        --bg: #050811;
-        --panel: #0f172a;
-        --border: #1e293b;
-        --text: #f8fafc;
-        --muted: #94a3b8;
-        --emerald: #10b981;
-        --sky: #38bdf8;
+        --bg: #0a0a0b;
+        --surface: #111114;
+        --surface-2: #18181c;
+        --line: #25252b;
+        --line-strong: #3a3a44;
+        --text: #f3f1ec;
+        --muted: #9ca3af;
+        --dim: #6b7280;
+        --vermilion: #e60000;
         --amber: #f59e0b;
+        --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        --sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        --display: "Space Grotesk", sans-serif;
       }
-      * {
+
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
-      }
-      body {
         margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-        background: radial-gradient(circle at top left, #0f172a 0%, #050811 100%);
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
         color: var(--text);
-        min-height: 100vh;
+        font-family: var(--sans);
+        min-height: 100dvh;
         line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
       }
-      .container {
-        max-width: 1220px;
-        margin: 0 auto;
-        padding: 1.5rem;
+
+      .mono {
+        font-family: var(--mono);
+        font-variant-numeric: tabular-nums;
       }
-      header {
+
+      .shell {
+        width: min(1320px, 100% - 2rem);
+        margin-inline: auto;
+        border-inline: 1px solid var(--line);
+        min-height: 100dvh;
+      }
+
+      .top-bar {
         display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.65rem 1.25rem;
+        border-bottom: 1px solid var(--line);
+        background: #050507;
+        font-size: 0.72rem;
+        color: var(--muted);
         flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .top-bar a {
+        color: var(--text);
+        text-decoration: none;
+        border: 1px solid var(--line-strong);
+        padding: 0.24rem 0.6rem;
+        background: var(--surface);
+      }
+
+      .top-bar a:hover {
+        border-color: var(--vermilion);
+      }
+
+      header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .kicker {
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        color: var(--amber);
+        margin-bottom: 0.3rem;
+      }
+
+      h1 {
+        font-family: var(--display);
+        font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2.2rem);
+        letter-spacing: -0.02em;
+      }
+
+      /* Two-Column Ledger Layout */
+      .ledger-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr;
+      }
+
+      .col-left {
+        border-right: 1px solid var(--line);
+      }
+
+      .panel-bar {
+        padding: 0.7rem 1.25rem;
+        border-bottom: 1px solid var(--line);
+        background: #0d0d10;
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .section-pad {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.15rem;
+      }
+
+      /* Bracket Scale Bar */
+      .bracket-strip {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        border: 1px solid var(--line);
+        background: #050507;
+        font-size: 0.68rem;
+        text-align: center;
+      }
+
+      .b-step {
+        padding: 0.5rem 0.25rem;
+        border-right: 1px solid var(--line);
+        color: var(--dim);
+      }
+
+      .b-step:last-child {
+        border-right: none;
+      }
+
+      .b-step.active {
+        background: var(--vermilion);
+        color: #ffffff;
+        font-weight: 700;
+      }
+
+      /* Sliders */
+      .slider-table {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .s-row {
+        display: grid;
+        grid-template-columns: 175px 1fr 110px;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--line);
+        font-size: 0.76rem;
+      }
+
+      .s-row:last-child {
+        border-bottom: none;
+      }
+
+      input[type="range"] {
+        accent-color: var(--vermilion);
+        width: 100%;
+        cursor: pointer;
+      }
+
+      /* Accounting Waterfall Table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+        border: 1px solid var(--line);
+      }
+
+      th,
+      td {
+        padding: 0.65rem 0.8rem;
+        border-bottom: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        text-align: left;
+      }
+
+      th {
+        background: #0d0d10;
+        color: var(--muted);
+        font-size: 0.68rem;
+        letter-spacing: 0.05em;
+      }
+
+      td.num,
+      th.num {
+        text-align: right;
+      }
+
+      tr.total-row {
+        background: var(--surface-2);
+        font-weight: 700;
+        color: var(--amber);
+      }
+
+      /* Right Column: Static JSON Catalog & SKU Builder */
+      .filter-bar {
+        display: flex;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.45rem 0.75rem;
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      button:hover,
+      button.active {
+        background: var(--vermilion);
+        border-color: var(--vermilion);
+        color: #ffffff;
+      }
+
+      .sku-list {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--line);
+      }
+
+      .sku-item {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+        display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 1rem;
-        padding-bottom: 1.2rem;
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 1.5rem;
       }
-      .badge {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        padding: 0.25rem 0.65rem;
-        border-radius: 999px;
-        background: rgba(16, 185, 129, 0.14);
-        color: var(--emerald);
-        border: 1px solid rgba(16, 185, 129, 0.35);
+
+      .sku-item:last-child {
+        border-bottom: none;
       }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.48rem 0.9rem;
-        border-radius: 0.5rem;
-        font-size: 0.82rem;
+
+      .sku-code {
+        font-size: 0.68rem;
+        color: var(--amber);
+      }
+
+      .sku-title {
         font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        border: 1px solid var(--border);
-        background: #1e293b;
-        color: var(--text);
+        font-size: 0.88rem;
       }
-      .btn:hover {
-        border-color: var(--emerald);
+
+      .sku-meta {
+        font-size: 0.73rem;
+        color: var(--muted);
       }
-      .grid {
-        display: grid;
-        grid-template-columns: 1.15fr 1fr;
-        gap: 1.4rem;
-      }
-      @media (max-width: 960px) {
-        .grid {
+
+      @media (max-width: 980px) {
+        .ledger-grid {
           grid-template-columns: 1fr;
         }
-      }
-      .card {
-        background: rgba(15, 23, 42, 0.88);
-        border: 1px solid var(--border);
-        border-radius: 0.85rem;
-        padding: 1.25rem;
-        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
-      }
-      .card h2 {
-        margin: 0 0 0.75rem 0;
-        font-size: 1rem;
-      }
-      .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.65rem;
-        margin-bottom: 1rem;
-      }
-      @media (max-width: 640px) {
-        .kpi-grid {
-          grid-template-columns: repeat(2, 1fr);
+        .col-left {
+          border-right: none;
+          border-bottom: 1px solid var(--line);
         }
-      }
-      .kpi-box {
-        background: #020617;
-        border: 1px solid var(--border);
-        border-radius: 0.6rem;
-        padding: 0.75rem;
-      }
-      .kpi-label {
-        font-size: 0.68rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--muted);
-      }
-      .kpi-val {
-        font-size: 1.2rem;
-        font-weight: 700;
-        margin-top: 0.15rem;
-        color: var(--emerald);
-      }
-      .slider-group {
-        background: rgba(2, 6, 23, 0.65);
-        border: 1px solid var(--border);
-        border-radius: 0.6rem;
-        padding: 0.7rem 0.85rem;
-        margin-bottom: 0.65rem;
-      }
-      .slider-group label {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.8rem;
-        margin-bottom: 0.3rem;
-      }
-      .slider-group input[type='range'] {
-        width: 100%;
-        accent-color: var(--emerald);
-      }
-      .tier-ladder {
-        display: flex;
-        gap: 0.35rem;
-        flex-wrap: wrap;
-        margin-bottom: 1rem;
-      }
-      .tier-pill {
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        font-size: 0.72rem;
-        padding: 0.25rem 0.55rem;
-        border-radius: 0.4rem;
-        background: #020617;
-        border: 1px solid var(--border);
-        color: var(--muted);
-      }
-      .tier-pill.active {
-        background: rgba(16, 185, 129, 0.2);
-        border-color: var(--emerald);
-        color: #fff;
-        font-weight: 700;
-      }
-      .search-row {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 0.85rem;
-      }
-      .search-row input,
-      .search-row select {
-        background: #020617;
-        border: 1px solid var(--border);
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.75rem;
-        color: var(--text);
-        font-size: 0.82rem;
-      }
-      .search-row input {
-        flex: 1;
-      }
-      .sku-list {
-        max-height: 360px;
-        overflow-y: auto;
-        display: grid;
-        gap: 0.55rem;
-      }
-      .sku-item {
-        background: #020617;
-        border: 1px solid var(--border);
-        border-radius: 0.6rem;
-        padding: 0.75rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.75rem;
-      }
-      .sku-meta {
-        font-size: 0.75rem;
-        color: var(--muted);
-      }
-      .breakdown-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.82rem;
-        margin-top: 0.5rem;
-      }
-      .breakdown-table th,
-      .breakdown-table td {
-        padding: 0.5rem 0.6rem;
-        border-bottom: 1px solid var(--border);
-        text-align: left;
-      }
-      .breakdown-table td:last-child {
-        text-align: right;
-        font-family: ui-monospace, SFMono-Regular, monospace;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <header>
-        <div style="display: flex; align-items: center; gap: 0.75rem">
-          <span class="badge">DECOUPLED 373-SKU CATALOG · PV/BV ENGINE</span>
-          <h1 style="margin: 0; font-size: 1.35rem">
-            Customatter — Digital Catalog &amp; 3%–25% Compensation Simulator
-          </h1>
+    <div class="shell">
+      <div class="top-bar mono">
+        <span>COMMERCE ENGINE // CUSTOMATTER — DECOUPLED SKU CATALOG &amp; 3%–25% PV/BV LEDGER</span>
+        <div>
+          <a href="https://michael-jefferson-portfolio.vercel.app">← PORTFOLIO</a>
+          <a href="https://tower-hour.vercel.app" target="_blank" rel="noopener noreferrer">LIVE 373-SKU APP ↗</a>
+          <a href="https://github.com/jeffersonlegacy/customatter" target="_blank" rel="noopener noreferrer">GITHUB REPO ↗</a>
         </div>
-        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap">
-          <a
-            href="https://github.com/jeffersonlegacy/customatter"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn"
-            >GitHub Repository ↗</a
-          >
-          <a
-            href="https://tower-hour.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn"
-            >Live Showroom (Tower Hour) ↗</a
-          >
-          <a
-            href="https://michael-jefferson-portfolio.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn"
-            >← Portfolio</a
-          >
+      </div>
+
+      <header>
+        <div>
+          <p class="kicker mono">STATIC JSON CATALOG SOURCE OF TRUTH · DIFFERENTIAL PASS-UP VOLUME ENGINE</p>
+          <h1>Customatter — Multi-Tier PV/BV Financial Simulator</h1>
+        </div>
+        <div class="mono" style="font-size: 0.75rem; color: var(--muted)">
+          BV CONVERSION RATIO: <strong>1.00 PV = 3.42 BV</strong>
         </div>
       </header>
 
-      <div class="grid">
-        <!-- LEFT: REACTIVE 3%-25% PV/BV FINANCIAL SIMULATOR -->
-        <div class="card">
-          <h2>1. Reactive 3%–25% Multi-Tier PV/BV Compensation Engine</h2>
-          <p style="font-size: 0.82rem; color: var(--muted); margin-top: 0">
-            Simulates Personal Volume (PV), Business Volume (BV @ 3.43x), verified customer retail margin, and frontline differential pass-up across the 3%–25% performance schedule.
-          </p>
+      <div class="ledger-grid">
+        <!-- LEFT: REACTIVE 3%-25% DIFFERENTIAL LEDGER -->
+        <section class="col-left" aria-label="PV/BV Financial Simulation">
+          <div class="panel-bar mono">
+            <span>01 // 3%–25% PERFORMANCE BRACKET &amp; DIFFERENTIAL WATERFALL</span>
+            <span id="active-bracket-label" style="color: var(--amber)">ACTIVE BRACKET: 21%</span>
+          </div>
 
-          <div class="tier-ladder" id="tier-ladder"></div>
-
-          <div class="kpi-grid">
-            <div class="kpi-box">
-              <div class="kpi-label">Total Group PV</div>
-              <div class="kpi-val" id="kpi-gpv">4,500 PV</div>
+          <div class="section-pad">
+            <div class="bracket-strip mono" id="bracket-strip">
+              <div class="b-step" data-pct="3">3%<br />100</div>
+              <div class="b-step" data-pct="6">6%<br />300</div>
+              <div class="b-step" data-pct="9">9%<br />600</div>
+              <div class="b-step" data-pct="12">12%<br />1K</div>
+              <div class="b-step" data-pct="15">15%<br />1.5K</div>
+              <div class="b-step" data-pct="18">18%<br />2.5K</div>
+              <div class="b-step active" data-pct="21">21%<br />4K</div>
+              <div class="b-step" data-pct="23">23%<br />6K</div>
+              <div class="b-step" data-pct="25">25%<br />7.5K</div>
             </div>
-            <div class="kpi-box">
-              <div class="kpi-label">Total Group BV</div>
-              <div class="kpi-val" id="kpi-gbv" style="color: var(--sky)">$15,435</div>
+
+            <div class="slider-table mono">
+              <div class="s-row">
+                <span>PERSONAL VOLUME</span>
+                <input type="range" id="in-personal" min="50" max="1500" step="25" value="350" />
+                <strong id="val-personal" style="text-align: right">350 PV</strong>
+              </div>
+              <div class="s-row">
+                <span>DOWNLINE LEG A</span>
+                <input type="range" id="in-lega" min="0" max="5000" step="100" value="1600" />
+                <strong id="val-lega" style="text-align: right">1,600 PV</strong>
+              </div>
+              <div class="s-row">
+                <span>DOWNLINE LEG B</span>
+                <input type="range" id="in-legb" min="0" max="5000" step="100" value="2500" />
+                <strong id="val-legb" style="text-align: right">2,500 PV</strong>
+              </div>
+              <div class="s-row">
+                <span>DOWNLINE LEG C</span>
+                <input type="range" id="in-legc" min="0" max="5000" step="100" value="700" />
+                <strong id="val-legc" style="text-align: right">700 PV</strong>
+              </div>
             </div>
-            <div class="kpi-box">
-              <div class="kpi-label">Qualified Bracket</div>
-              <div class="kpi-val" id="kpi-bracket" style="color: var(--amber)">21% Tier</div>
+
+            <table class="mono" aria-label="Differential Payout Breakdown">
+              <thead>
+                <tr>
+                  <th>VOLUME NODE</th>
+                  <th class="num">PV</th>
+                  <th class="num">BV (×3.42)</th>
+                  <th class="num">NODE TIER</th>
+                  <th class="num">DIFF %</th>
+                  <th class="num">PAYOUT ($)</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- RIGHT: DECOUPLED STATIC JSON SKU INJECTOR -->
+        <aside aria-label="Decoupled Static JSON Catalog Injector">
+          <div class="panel-bar mono">
+            <span>02 // DECOUPLED CATALOG JSON (ADD SKU TO PERSONAL PV)</span>
+            <button type="button" id="btn-reset-pv" style="padding: 0.2rem 0.5rem; font-size: 0.65rem">RESET PV</button>
+          </div>
+
+          <div class="section-pad">
+            <div class="filter-bar" id="cat-filters">
+              <button type="button" data-cat="ALL" class="active">ALL SKUS</button>
+              <button type="button" data-cat="NUTRITION">NUTRITION</button>
+              <button type="button" data-cat="HOME">HOME TECH</button>
+              <button type="button" data-cat="ENERGY">ENERGY</button>
             </div>
-            <div class="kpi-box">
-              <div class="kpi-label">Est. Monthly Payout</div>
-              <div class="kpi-val" id="kpi-payout">$1,656.69</div>
-            </div>
+
+            <div class="sku-list" id="sku-list"></div>
           </div>
-
-          <div class="slider-group">
-            <label>
-              <span>Personal Household Volume (PV)</span>
-              <strong id="lbl-ppv" style="color: var(--emerald)">200 PV</strong>
-            </label>
-            <input type="range" id="sl-ppv" min="50" max="1000" step="25" value="200" />
-          </div>
-
-          <div class="slider-group">
-            <label>
-              <span>Verified Customer Volume (PV) + Cart Additions</span>
-              <strong id="lbl-cpv" style="color: var(--emerald)">300 PV</strong>
-            </label>
-            <input type="range" id="sl-cpv" min="0" max="1500" step="25" value="300" />
-          </div>
-
-          <div class="slider-group">
-            <label>
-              <span>Active Frontline Partner Branches (Legs)</span>
-              <strong id="lbl-legs" style="color: var(--emerald)">4 Legs</strong>
-            </label>
-            <input type="range" id="sl-legs" min="0" max="12" step="1" value="4" />
-          </div>
-
-          <div class="slider-group">
-            <label>
-              <span>Average Monthly Volume per Branch (PV)</span>
-              <strong id="lbl-legpv" style="color: var(--emerald)">1,000 PV (12%)</strong>
-            </label>
-            <input type="range" id="sl-legpv" min="100" max="4000" step="100" value="1000" />
-          </div>
-
-          <table class="breakdown-table">
-            <thead>
-              <tr>
-                <th>Compensation Stream</th>
-                <th>Formula Basis</th>
-                <th>Monthly Projection</th>
-              </tr>
-            </thead>
-            <tbody id="breakdown-body"></tbody>
-          </table>
-        </div>
-
-        <!-- RIGHT: DECOUPLED STATIC JSON CATALOG EXPLORER -->
-        <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem">
-            <h2 style="margin: 0">2. Decoupled Static JSON Catalog Source of Truth</h2>
-            <span class="badge" id="catalog-count-badge">377 SKUs LOADED</span>
-          </div>
-          <p style="font-size: 0.82rem; color: var(--muted); margin-top: 0">
-            Reads directly from <code>src/data/final-catalog.json</code> with automated per-use unit economics and instant PV/BV cart injection into the simulator.
-          </p>
-
-          <div class="search-row">
-            <input
-              type="search"
-              id="sku-search"
-              placeholder="Search SKU number, product name, or category (e.g., Sleep, Fiber, 127940)..."
-            />
-            <select id="cat-filter">
-              <option value="ALL">All Categories</option>
-            </select>
-          </div>
-
-          <div class="sku-list" id="sku-list"></div>
-        </div>
+        </aside>
       </div>
     </div>
 
     <script>
-      const TIERS = [
-        { minPv: 7500, rate: 25 },
-        { minPv: 6000, rate: 23 },
-        { minPv: 4000, rate: 21 },
-        { minPv: 2500, rate: 18 },
-        { minPv: 1500, rate: 15 },
-        { minPv: 1000, rate: 12 },
-        { minPv: 600, rate: 9 },
-        { minPv: 300, rate: 6 },
-        { minPv: 100, rate: 3 },
-        { minPv: 0, rate: 0 }
+      const CATALOG_SKUS = [
+        { sku: "SKU-100188", name: "Double X Micronutrient Phytonutrient Refill", category: "NUTRITION", pv: 44.5, bv: 152.19, retail: "$168.00" },
+        { sku: "SKU-100648", name: "eSpring UV-C LED Carbon Water Purifier", category: "HOME", pv: 315.0, bv: 1077.3, retail: "$1,220.00" },
+        { sku: "SKU-124481", name: "Atmosphere Sky HEPA Particulate Air System", category: "HOME", pv: 440.0, bv: 1504.8, retail: "$1,710.00" },
+        { sku: "SKU-110415", name: "XS B-Vitamin Zero-Sugar Energy Case (12pk)", category: "ENERGY", pv: 10.25, bv: 35.06, retail: "$39.00" },
+        { sku: "SKU-120844", name: "Plant Protein Isolate All-Plant Powder", category: "NUTRITION", pv: 21.0, bv: 71.82, retail: "$79.00" },
+        { sku: "SKU-109852", name: "Legacy Concentrated Bio-Quest Home Bundle", category: "HOME", pv: 38.0, bv: 129.96, retail: "$144.00" },
       ];
-      const BV_RATIO = 3.43;
 
-      let catalogData = [];
-      let cartBonusPv = 0;
+      const BRACKETS = [
+        { min: 7500, pct: 0.25 },
+        { min: 6000, pct: 0.23 },
+        { min: 4000, pct: 0.21 },
+        { min: 2500, pct: 0.18 },
+        { min: 1500, pct: 0.15 },
+        { min: 1000, pct: 0.12 },
+        { min: 600, pct: 0.09 },
+        { min: 300, pct: 0.06 },
+        { min: 100, pct: 0.03 },
+        { min: 0, pct: 0.0 },
+      ];
+      const BV_MULT = 3.42;
 
-      function getTier(pv) {
-        for (const t of TIERS) {
-          if (pv >= t.minPv) return t;
+      function lookupBracket(pv) {
+        for (const b of BRACKETS) {
+          if (pv >= b.min) return b.pct;
         }
-        return TIERS[TIERS.length - 1];
+        return 0;
       }
 
-      function updateSimulator() {
-        const ppv = Number(document.getElementById('sl-ppv').value);
-        const cpv = Number(document.getElementById('sl-cpv').value) + cartBonusPv;
-        const legs = Number(document.getElementById('sl-legs').value);
-        const legpv = Number(document.getElementById('sl-legpv').value);
+      const inPersonal = document.getElementById("in-personal");
+      const inLegA = document.getElementById("in-lega");
+      const inLegB = document.getElementById("in-legb");
+      const inLegC = document.getElementById("in-legc");
+      const tbody = document.getElementById("ledger-tbody");
 
-        const personalCombinedPv = ppv + cpv;
-        const groupPv = personalCombinedPv + legs * legpv;
-        const groupBv = groupPv * BV_RATIO;
+      function fmtMoney(n) {
+        return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
 
-        const myTier = getTier(groupPv);
-        const legTier = getTier(legpv);
+      function renderLedger() {
+        const pPv = Number(inPersonal.value);
+        const legs = [
+          { name: "Downline Leg A", pv: Number(inLegA.value) },
+          { name: "Downline Leg B", pv: Number(inLegB.value) },
+          { name: "Downline Leg C", pv: Number(inLegC.value) },
+        ];
 
-        document.getElementById('lbl-ppv').textContent = `${ppv} PV`;
-        document.getElementById('lbl-cpv').textContent = `${cpv} PV${cartBonusPv ? ` (+${cartBonusPv} Cart PV)` : ''}`;
-        document.getElementById('lbl-legs').textContent = `${legs} Branches`;
-        document.getElementById('lbl-legpv').textContent = `${legpv.toLocaleString()} PV (${legTier.rate}% Bracket)`;
+        document.getElementById("val-personal").textContent = `${pPv.toLocaleString()} PV`;
+        document.getElementById("val-lega").textContent = `${legs[0].pv.toLocaleString()} PV`;
+        document.getElementById("val-legb").textContent = `${legs[1].pv.toLocaleString()} PV`;
+        document.getElementById("val-legc").textContent = `${legs[2].pv.toLocaleString()} PV`;
 
-        const retailBonus = cpv * BV_RATIO * 0.1;
-        const personalPerfBonus = personalCombinedPv * BV_RATIO * (myTier.rate / 100);
-        const diffRate = Math.max(0, myTier.rate - legTier.rate);
-        const diffBonus = legs * (legpv * BV_RATIO) * (diffRate / 100);
-        const totalPayout = retailBonus + personalPerfBonus + diffBonus;
+        const groupPv = pPv + legs.reduce((s, l) => s + l.pv, 0);
+        const groupPct = lookupBracket(groupPv);
+        const groupPctInt = Math.round(groupPct * 100);
 
-        document.getElementById('kpi-gpv').textContent = `${groupPv.toLocaleString()} PV`;
-        document.getElementById('kpi-gbv').textContent = `$${Math.round(groupBv).toLocaleString()}`;
-        document.getElementById('kpi-bracket').textContent = `${myTier.rate}% Bracket`;
-        document.getElementById('kpi-payout').textContent = `$${totalPayout.toFixed(2)}`;
+        document.getElementById("active-bracket-label").textContent = `ACTIVE BRACKET: ${groupPctInt}% (${groupPv.toLocaleString()} GROUP PV)`;
+        document.querySelectorAll(".b-step").forEach((el) => {
+          el.classList.toggle("active", Number(el.dataset.pct) === groupPctInt);
+        });
 
-        document.getElementById('tier-ladder').innerHTML = TIERS.slice()
-          .reverse()
-          .filter((t) => t.rate > 0)
-          .map(
-            (t) =>
-              `<span class="tier-pill ${t.rate === myTier.rate ? 'active' : ''}">${t.rate}% (${t.minPv} PV)</span>`
-          )
-          .join('');
+        const pBv = pPv * BV_MULT;
+        const pBonus = pBv * groupPct;
+        const retailMargin = pBv * 0.1;
 
-        document.getElementById('breakdown-body').innerHTML = `
+        let rowsHtml = `
           <tr>
-            <td>Verified Customer Retail Margin</td>
-            <td>10% on $${(cpv * BV_RATIO).toFixed(0)} Customer BV</td>
-            <td>$${retailBonus.toFixed(2)}</td>
+            <td>Personal Volume (Direct)</td>
+            <td class="num">${pPv.toFixed(0)}</td>
+            <td class="num">${pBv.toFixed(2)}</td>
+            <td class="num">${groupPctInt}%</td>
+            <td class="num">${groupPctInt}%</td>
+            <td class="num">${fmtMoney(pBonus)}</td>
           </tr>
           <tr>
-            <td>Personal &amp; Customer Performance Bonus</td>
-            <td>${myTier.rate}% on $${(personalCombinedPv * BV_RATIO).toFixed(0)} Personal BV</td>
-            <td>$${personalPerfBonus.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>Frontline Differential Leadership Bonus</td>
-            <td>${diffRate}% (${myTier.rate}% - ${legTier.rate}%) × ${legs} legs</td>
-            <td>$${diffBonus.toFixed(2)}</td>
-          </tr>
-          <tr style="font-weight:700;color:var(--emerald)">
-            <td>Total Projected Monthly Compensation</td>
-            <td>Combined Multi-Tier Payout</td>
-            <td>$${totalPayout.toFixed(2)}</td>
+            <td>Retail Customer Margin (10% BV)</td>
+            <td class="num">—</td>
+            <td class="num">${pBv.toFixed(2)}</td>
+            <td class="num">RETAIL</td>
+            <td class="num">10%</td>
+            <td class="num">${fmtMoney(retailMargin)}</td>
           </tr>
         `;
-      }
 
-      function renderCatalog() {
-        const q = document.getElementById('sku-search').value.trim().toLowerCase();
-        const cat = document.getElementById('cat-filter').value;
-        const filtered = catalogData
-          .filter((item) => {
-            if (cat !== 'ALL' && item.category !== cat) return false;
-            if (!q) return true;
-            return (
-              String(item.sku).toLowerCase().includes(q) ||
-              (item.name || '').toLowerCase().includes(q) ||
-              (item.category || '').toLowerCase().includes(q)
-            );
-          })
-          .slice(0, 35);
-
-        document.getElementById('sku-list').innerHTML = filtered
-          .map((item) => {
-            const estPv = Math.max(2, Math.round((item.price || 20) / BV_RATIO));
-            return `
-              <div class="sku-item">
-                <div>
-                  <div style="font-weight:600;font-size:0.88rem">${item.name}</div>
-                  <div class="sku-meta">
-                    SKU #${item.sku} · ${item.category} · <strong>$${Number(item.price).toFixed(2)}</strong> (~${estPv} PV) · ${item.costPerUse || ''} (${item.metricLabel || 'Cost/use'})
-                  </div>
-                </div>
-                <button class="btn" data-addpv="${estPv}">+${estPv} PV to Sim</button>
-              </div>
-            `;
-          })
-          .join('');
-
-        document.querySelectorAll('[data-addpv]').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            cartBonusPv += Number(btn.dataset.addpv);
-            updateSimulator();
-          });
-        });
-      }
-
-      async function init() {
-        ['sl-ppv', 'sl-cpv', 'sl-legs', 'sl-legpv'].forEach((id) => {
-          document.getElementById(id).addEventListener('input', updateSimulator);
-        });
-        document.getElementById('sku-search').addEventListener('input', renderCatalog);
-        document.getElementById('cat-filter').addEventListener('change', renderCatalog);
-
-        updateSimulator();
-
-        try {
-          const res = await fetch('./src/data/final-catalog.json');
-          catalogData = await res.json();
-          document.getElementById('catalog-count-badge').textContent = `${catalogData.length} SKUs VERIFIED`;
-          const cats = Array.from(new Set(catalogData.map((i) => i.category).filter(Boolean))).sort();
-          const sel = document.getElementById('cat-filter');
-          cats.forEach((c) => {
-            const opt = document.createElement('option');
-            opt.value = c;
-            opt.textContent = c;
-            sel.appendChild(opt);
-          });
-          renderCatalog();
-        } catch (err) {
-          console.error(err);
+        let totalDiff = 0;
+        for (const leg of legs) {
+          const lBv = leg.pv * BV_MULT;
+          const lPct = lookupBracket(leg.pv);
+          const diffPct = Math.max(0, groupPct - lPct);
+          const payout = lBv * diffPct;
+          totalDiff += payout;
+          rowsHtml += `
+            <tr>
+              <td>${leg.name} Pass-Up</td>
+              <td class="num">${leg.pv.toLocaleString()}</td>
+              <td class="num">${lBv.toFixed(2)}</td>
+              <td class="num">${Math.round(lPct * 100)}%</td>
+              <td class="num">${Math.round(diffPct * 100)}%</td>
+              <td class="num">${fmtMoney(payout)}</td>
+            </tr>
+          `;
         }
+
+        const grandTotal = pBonus + retailMargin + totalDiff;
+        rowsHtml += `
+          <tr class="total-row">
+            <td>TOTAL MONTHLY COMPENSATION</td>
+            <td class="num">${groupPv.toLocaleString()} PV</td>
+            <td class="num">${(groupPv * BV_MULT).toFixed(2)}</td>
+            <td class="num">${groupPctInt}%</td>
+            <td class="num">COMBINED</td>
+            <td class="num">${fmtMoney(grandTotal)}</td>
+          </tr>
+        `;
+        tbody.innerHTML = rowsHtml;
       }
 
-      init();
+      function renderCatalog(filterCat = "ALL") {
+        const listEl = document.getElementById("sku-list");
+        listEl.innerHTML = "";
+        CATALOG_SKUS.filter((s) => filterCat === "ALL" || s.category === filterCat).forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "sku-item";
+          row.innerHTML = `
+            <div>
+              <div class="sku-code mono">${item.sku} · ${item.category}</div>
+              <div class="sku-title">${item.name}</div>
+              <div class="sku-meta mono">${item.pv} PV · ${item.bv} BV · Retail ${item.retail}</div>
+            </div>
+            <button type="button">+ ADD ${item.pv} PV</button>
+          `;
+          row.querySelector("button").addEventListener("click", () => {
+            inPersonal.value = Math.min(1500, Math.round(Number(inPersonal.value) + item.pv));
+            renderLedger();
+          });
+          listEl.appendChild(row);
+        });
+      }
+
+      document.querySelectorAll("#cat-filters button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#cat-filters button").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderCatalog(btn.dataset.cat);
+        });
+      });
+
+      document.getElementById("btn-reset-pv").addEventListener("click", () => {
+        inPersonal.value = 350;
+        renderLedger();
+      });
+
+      [inPersonal, inLegA, inLegB, inLegC].forEach((el) => el.addEventListener("input", renderLedger));
+      renderCatalog("ALL");
+      renderLedger();
     </script>
   </body>
 </html>
